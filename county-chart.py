@@ -51,18 +51,44 @@ if __name__ == '__main__':
             plt.subplot(rows, 4, i+1)
 
             data = []
-            for df in frames:
-                data.append(df.loc[counties[i]][metric_index])
+            last_data = frames[0].loc[counties[i]][metric_index]
 
-            plt.plot(xs, data, color='#CfCfff')
-            plt.xticks(xs,dates,rotation=45)
+            for df in frames:
+                new_data = df.loc[counties[i]][metric_index]
+                data.append(max(0,new_data - last_data))
+                last_data = new_data
+
+            linedata = data[1:]
+
+            cumulative = 0
+
+            for j in range(1,8):
+                cumulative += data[j]
+                linedata[j-1] = cumulative / j
+
+            for j in range(8, len(data)):
+                cumulative -= data[j-7]
+                cumulative += data[j]
+                linedata[j-1] = cumulative / 7
+
+            plt.bar(xs[1:], data[1:], color='#CfCfff')
+            plt.plot(xs[1:], linedata, color='r')
+            bottom, top = plt.ylim()  # return the current ylim
+            bottom = max(0, bottom)
+            top = max(8,top)
+            plt.ylim(bottom,top)
+            plt.xticks(xs[1:],dates[1:],rotation=45)
             plt.title('Daily C19 '+metric_name+' in '+counties[i]+' County FL')
             plt.tight_layout()
 
         ts = datetime.datetime.now().strftime("%Y-%m-%d")
 
         plt.suptitle("COVID-19 " + metric_name + " for Florida's Counties on "+ts, fontsize=24)
-        plt.figtext(0.5, 0.02, "Chart prepared by Charles McGuinness @socialseercom using data from covidtracking.com", ha="center",
+        plt.figtext(0.5, 0.04, "Blue Bars = Daily Change, Red Line = 7 day trailing average (mean)", ha="center",
+                    fontsize=16)
+        plt.figtext(0.5, 0.03, "Not All Counties using same Y Scale !", ha="center",
+                    fontsize=16)
+        plt.figtext(0.5, 0.02, "Chart prepared by Charles McGuinness @socialseercom using data from State of Florida DOH", ha="center",
                     fontsize=16)
         fig.subplots_adjust(top=0.95, bottom=0.05)
 
