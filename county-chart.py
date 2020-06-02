@@ -14,6 +14,11 @@ counties = ["GILCHRIST", "PUTNAM", "TAYLOR", "OKALOOSA", "CALHOUN", "PALM BEACH"
 counties.sort()
 
 if __name__ == '__main__':
+    total_pos_up = 0
+    total_death_up = 0
+    non_zero_was_zero_pos = 0
+    non_zero_was_zero_death = 0
+
     files = []
     dates = []
     for fname in os.listdir('data/'):
@@ -62,17 +67,31 @@ if __name__ == '__main__':
 
             cumulative = 0
 
-            for j in range(1,8):
-                cumulative += data[j]
-                linedata[j-1] = cumulative / j
+            for k in range(1,8):
+                cumulative += data[k]
+                linedata[k-1] = cumulative / k
 
-            for j in range(8, len(data)):
-                cumulative -= data[j-7]
-                cumulative += data[j]
-                linedata[j-1] = cumulative / 7
+            for k in range(8, len(data)):
+                cumulative -= data[k-7]
+                cumulative += data[k]
+                linedata[k-1] = cumulative / 7
 
             plt.bar(xs[1:], data[1:], color='#CfCfff')
             plt.plot(xs[1:], linedata, color='r')
+
+            if linedata[-1] > linedata[-8]:
+                if metric_names[j] == "Deaths":
+                    total_death_up += 1
+                else:
+                    total_pos_up += 1
+
+            if linedata[-1] > 1 and linedata[-8] < 1:
+                if metric_names[j] == "Deaths":
+                    non_zero_was_zero_death += 1
+                else:
+                    non_zero_was_zero_pos += 1
+
+
             bottom, top = plt.ylim()  # return the current ylim
             bottom = max(0, bottom)
             top = max(8,top)
@@ -93,3 +112,8 @@ if __name__ == '__main__':
         fig.subplots_adjust(top=0.95, bottom=0.05)
 
         plt.savefig('images/' + ts + '-county-'+metric_name+'.png', dpi=150)
+
+    print('# counties with increase in positives', total_pos_up)
+    print('# counties with increas in deaths', total_death_up)
+    print('# counties > 1 positive but <1 a week ago', non_zero_was_zero_pos)
+    print('# counties > 1 death but <1 a week ago', non_zero_was_zero_death)
