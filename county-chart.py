@@ -16,8 +16,12 @@ counties.sort()
 if __name__ == '__main__':
     total_pos_up = 0
     total_death_up = 0
+    total_pos_down = 0
+    total_death_down = 0
     non_zero_was_zero_pos = 0
     non_zero_was_zero_death = 0
+    zero_was_non_zero_pos = 0
+    zero_was_non_zero_death = 0
 
     files = []
     dates = []
@@ -79,11 +83,18 @@ if __name__ == '__main__':
             plt.bar(xs[1:], data[1:], color='#CfCfff')
             plt.plot(xs[1:], linedata, color='r')
 
-            if linedata[-1] > linedata[-8]:
+            if linedata[-1] > 1+linedata[-8]:
                 if metric_names[j] == "Deaths":
                     total_death_up += 1
                 else:
                     total_pos_up += 1
+
+            if linedata[-1]+1 < linedata[-8]:
+                if metric_names[j] == "Deaths":
+                    total_death_down += 1
+                else:
+                    total_pos_down += 1
+
 
             if linedata[-1] > 1 and linedata[-8] < 1:
                 if metric_names[j] == "Deaths":
@@ -91,6 +102,11 @@ if __name__ == '__main__':
                 else:
                     non_zero_was_zero_pos += 1
 
+            if linedata[-1] < 1 and linedata[-8] > 1:
+                if metric_names[j] == "Deaths":
+                    zero_was_non_zero_death += 1
+                else:
+                    zero_was_non_zero_pos += 1
 
             bottom, top = plt.ylim()  # return the current ylim
             bottom = max(0, bottom)
@@ -114,6 +130,10 @@ if __name__ == '__main__':
         plt.savefig('images/' + ts + '-county-'+metric_name+'.png', dpi=150)
 
     print('# counties with increase in positives', total_pos_up)
-    print('# counties with increas in deaths', total_death_up)
-    print('# counties > 1 positive but <1 a week ago', non_zero_was_zero_pos)
-    print('# counties > 1 death but <1 a week ago', non_zero_was_zero_death)
+    print('# counties with increase in deaths', total_death_up)
+    print('# counties with decrease in positives', total_pos_down)
+    print('# counties with decrease in deaths', total_death_down)
+    print('# counties > 1 positive but < 1 a week ago', non_zero_was_zero_pos)
+    print('# counties > 1 death but < 1 a week ago', non_zero_was_zero_death)
+    print('# counties < 1 positive but > 1 a week ago', zero_was_non_zero_pos)
+    print('# counties < 1 death but > 1 a week ago', zero_was_non_zero_death)
