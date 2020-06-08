@@ -33,7 +33,11 @@ if __name__ == '__main__':
 
     files.sort()
     dates.sort()
-    # pandas.read_csv
+    dates = np.array(dates)
+    # Weed out dates from the array so that the plot isn't so dense
+    sparseness = 2
+    for i in range(sparseness - 1):
+        dates[len(dates) - (i + 2)::-sparseness] = ""
 
     frames = []
 
